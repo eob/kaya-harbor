@@ -45,7 +45,7 @@ When completely finished and verified, issue your completion statement.
     systemPrompt: systemPrompt,
     conversation: discoveryMessage,
     tools: tools,
-    model: "anthropic/claude-3-7-sonnet"
+    model: "google/gemini-2.5-pro"
   )
 
   // Phase 2: Iterative Problem Solving Loop
@@ -62,7 +62,7 @@ When completely finished and verified, issue your completion statement.
         systemPrompt: systemPrompt,
         message: "The previous action encountered an error: " + step.error_message + ". Please diagnose and correct your approach.",
         tools: tools,
-        model: "anthropic/claude-3-7-sonnet"
+        model: "google/gemini-2.5-pro"
       )
       continue
     }
@@ -70,7 +70,7 @@ When completely finished and verified, issue your completion statement.
     step = agentStep(
       systemPrompt: systemPrompt,
       tools: tools,
-      model: "anthropic/claude-3-7-sonnet"
+      model: "google/gemini-2.5-pro"
     )
   }
 

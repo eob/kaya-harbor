@@ -45,7 +45,7 @@ To solve the task:
       systemPrompt: systemPrompt,
       conversation: conversation,
       tools: tools,
-      model: "anthropic/claude-3-7-sonnet"
+      model: "google/gemini-2.5-pro"
     )
 
     // Check disposition

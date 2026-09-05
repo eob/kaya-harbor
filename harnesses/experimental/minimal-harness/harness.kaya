@@ -22,7 +22,7 @@ function main(task: TaskContext): TaskResult {
   let reply = generate(
     system: "You are an automated evaluation test runner.",
     message: prompt,
-    model: "anthropic/claude-3-7-sonnet"
+    model: "google/gemini-2.5-flash"
   )
 
   // Emit result

@@ -11,5 +11,5 @@ entrypoint = "harness.kaya"
 capabilities = ["exec:bash", "fs:read", "fs:write"]
 
 [models]
-default = "anthropic/claude-3-7-sonnet"
+default = "google/gemini-2.5-pro"
 temperature = 0.0
