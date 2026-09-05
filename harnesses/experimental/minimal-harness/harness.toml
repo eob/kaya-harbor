@@ -1,0 +1,15 @@
+[harness]
+name = "minimal-harness"
+namespace = "experimental"
+version = "0.0.1-wip"
+description = "Minimal one-shot connectivity smoke test harness for Harbor evaluation runner (EXPERIMENTAL PSEUDOCODE)."
+author = "eob"
+license = "Apache-2.0"
+entrypoint = "harness.kaya"
+
+[requirements]
+capabilities = ["exec:bash"]
+
+[models]
+default = "anthropic/claude-3-7-sonnet"
+temperature = 0.0

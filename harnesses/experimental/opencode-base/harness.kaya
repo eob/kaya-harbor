@@ -1,0 +1,85 @@
+// ==============================================================================
+// EXPERIMENTAL PSEUDOCODE - NOT A WORKING CONTRACT
+// Purpose: Standard OpenCode / SWE-agent style coding baseline in Kaya
+// ==============================================================================
+
+type TaskContext = {
+  instruction: string,
+  repo_path: string?,
+  max_turns: number?
+}
+
+type OpenCodeOutcome = {
+  status: "success" | "budget_exhausted" | "failed",
+  git_diff: string,
+  summary: string
+}
+
+function main(task: TaskContext): OpenCodeOutcome {
+  let maxTurns: number = task.max_turns ?? 40
+  let turn: number = 0
+
+  let tools = [
+    capability("exec:bash"),
+    capability("fs:read"),
+    capability("fs:write")
+  ]
+
+  let systemPrompt: string = """
+You are an autonomous AI software engineer working in a Linux repository environment.
+Your task is to resolve the user's issue or fulfill the benchmark specification.
+
+### Engineering Guidelines
+1. Explore First: Inspect directory layout, git status, and search for relevant keywords before modifying files.
+2. Reproduce: If the task is a bug fix, identify or write a minimal reproduction command or test case.
+3. Minimal Edits: Make surgical changes that directly address the issue. Do not reformat unrelated code.
+4. Verify: Run existing tests, linters, or your reproduction command to verify the fix.
+5. Clean Diff: Ensure `git status` and `git diff` only reflect intentional changes.
+
+When completely finished and verified, issue your completion statement.
+"""
+
+  // Phase 1: Environment Discovery & Orientation Turn
+  let discoveryMessage: string = "Task instruction:\n" + task.instruction + "\n\nPlease begin by inspecting the workspace and locating the relevant files."
+  let step = agentStep(
+    systemPrompt: systemPrompt,
+    conversation: discoveryMessage,
+    tools: tools,
+    model: "anthropic/claude-3-7-sonnet"
+  )
+
+  // Phase 2: Iterative Problem Solving Loop
+  while turn < maxTurns {
+    turn = turn + 1
+
+    if step.disposition == "completed" {
+      break
+    }
+
+    if step.disposition == "error" {
+      // Allow self-recovery turn
+      step = agentStep(
+        systemPrompt: systemPrompt,
+        message: "The previous action encountered an error: " + step.error_message + ". Please diagnose and correct your approach.",
+        tools: tools,
+        model: "anthropic/claude-3-7-sonnet"
+      )
+      continue
+    }
+
+    step = agentStep(
+      systemPrompt: systemPrompt,
+      tools: tools,
+      model: "anthropic/claude-3-7-sonnet"
+    )
+  }
+
+  // Phase 3: Final Verification & Diff Capture
+  let diffOutput = exec(command: "git diff HEAD")
+
+  return {
+    status: (turn < maxTurns) ? "success" : "budget_exhausted",
+    git_diff: diffOutput.stdout,
+    summary: step.assistant_text ?? "Task completed."
+  }
+}

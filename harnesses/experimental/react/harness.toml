@@ -1,0 +1,15 @@
+[harness]
+name = "react"
+namespace = "experimental"
+version = "0.0.1-wip"
+description = "Classic ReAct multi-turn coding loop over container execution tools (EXPERIMENTAL PSEUDOCODE)."
+author = "eob"
+license = "Apache-2.0"
+entrypoint = "harness.kaya"
+
+[requirements]
+capabilities = ["exec:bash", "fs:read", "fs:write"]
+
+[models]
+default = "anthropic/claude-3-7-sonnet"
+temperature = 0.0

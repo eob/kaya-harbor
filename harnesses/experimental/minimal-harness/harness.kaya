@@ -1,0 +1,33 @@
+// ==============================================================================
+// EXPERIMENTAL PSEUDOCODE - NOT A WORKING CONTRACT
+// Purpose: Minimal end-to-end smoke test validating Harbor -> Adapter -> Kaya -> Container
+// ==============================================================================
+
+type TaskContext = {
+  instruction: string,
+  timeout_seconds: number?
+}
+
+type TaskResult = {
+  status: "completed" | "failed",
+  message: string
+}
+
+function main(task: TaskContext): TaskResult {
+  // Await satellite container embodiment
+  let session = awaitAttachment(capability: "exec:bash")
+
+  // Generate response or run single command
+  let prompt: string = "You are a test agent. Follow this instruction: " + task.instruction
+  let reply = generate(
+    system: "You are an automated evaluation test runner.",
+    message: prompt,
+    model: "anthropic/claude-3-7-sonnet"
+  )
+
+  // Emit result
+  return {
+    status: "completed",
+    message: reply
+  }
+}

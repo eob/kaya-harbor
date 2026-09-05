@@ -1,0 +1,74 @@
+// ==============================================================================
+// EXPERIMENTAL PSEUDOCODE - NOT A WORKING CONTRACT
+// Purpose: Classic ReAct (Thought -> Action -> Observation) coding loop in Kaya
+// ==============================================================================
+
+type TaskContext = {
+  instruction: string,
+  max_turns: number?
+}
+
+type ReActOutcome = {
+  status: "success" | "budget_exhausted" | "error",
+  turns_executed: number,
+  final_message: string
+}
+
+function main(task: TaskContext): ReActOutcome {
+  let maxTurns: number = task.max_turns ?? 30
+  let currentTurn: number = 0
+
+  // Bind tools provided by the container satellite
+  let tools = [
+    capability("exec:bash"),
+    capability("fs:read"),
+    capability("fs:write")
+  ]
+
+  let systemPrompt: string = """
+You are an expert autonomous software engineer.
+You are running inside a Linux evaluation container.
+To solve the task:
+1. Formulate a hypothesis / thought.
+2. Call tools to inspect code, read files, or execute shell commands.
+3. Observe tool results and iterate.
+4. When you have completed the task and verified your solution, submit your final answer.
+"""
+
+  let conversation: string = task.instruction
+
+  while currentTurn < maxTurns {
+    currentTurn = currentTurn + 1
+
+    // Step the agent: model decides whether to call tools or finish
+    let step = agentStep(
+      systemPrompt: systemPrompt,
+      conversation: conversation,
+      tools: tools,
+      model: "anthropic/claude-3-7-sonnet"
+    )
+
+    // Check disposition
+    if step.disposition == "completed" {
+      return {
+        status: "success",
+        turns_executed: currentTurn,
+        final_message: step.assistant_text
+      }
+    }
+
+    if step.disposition == "error" {
+      return {
+        status: "error",
+        turns_executed: currentTurn,
+        final_message: step.error_message
+      }
+    }
+  }
+
+  return {
+    status: "budget_exhausted",
+    turns_executed: currentTurn,
+    final_message: "Agent reached max turn limit without completing task."
+  }
+}
